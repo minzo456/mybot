@@ -1,46 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="si">
 <head>
-    <title>MINZO-GPT TERMINAL</title>
+    <meta charset="UTF-8">
+    <title>MINZO-GPT // WEB TERMINAL</title>
     <style>
-        /* වීඩියෝ එකේ වගේ හැකර් පෙනුම */
-        body { background: #000; color: #00ff41; font-family: monospace; padding: 20px; }
-        #output { height: 400px; overflow: auto; border: 1px solid #00ff41; padding: 10px; margin-bottom: 10px; }
-        input { width: 90%; background: #000; border: 1px solid #ff0000; color: #fff; padding: 10px; }
+        body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; padding: 20px; }
+        #terminal { border: 1px solid #333; height: 75vh; overflow-y: auto; padding: 15px; background: rgba(5,5,5,0.9); box-shadow: 0 0 15px #00ff4122; }
+        .input-box { display: flex; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; }
+        input { background: transparent; border: none; color: #fff; flex: 1; outline: none; font-family: inherit; font-size: 16px; }
+        .prompt { color: #ff0000; font-weight: bold; margin-right: 10px; }
+        .response { color: #ccc; margin-top: 10px; margin-bottom: 20px; white-space: pre-wrap; display: block; }
     </style>
 </head>
 <body>
-    <h1>🔱 MINZO-GPT V75.0</h1>
-    <div id="output">System Ready... Waiting for Specialist Command...</div>
-    <input type="text" id="cmd" placeholder="Type here..." onkeypress="run(event)">
 
-    <script>
-        async function run(e) {
-            if (e.key === 'Enter') {
-                const input = document.getElementById('cmd');
-                const out = document.getElementById('output');
-                const text = input.value;
-                
-                out.innerHTML += `<div style="color:red">Master: ${text}</div>`;
-                input.value = "";
+<div id="terminal">
+    <div style="color: #ff0000;">🔱 MINZO-GPT V75.0 // ONLINE TERMINAL</div>
+    <div>System Status: <span style="color: #00ff41;">CONNECTED VIA GITHUB PAGES</span></div>
+    <hr style="border: 0.5px solid #222;">
+    <div id="output"></div>
+</div>
 
-                // මෙන්න මෙතනදී තමයි AI එකට කනෙක්ට් වෙන්නේ (Encoded Key එක සමඟ)
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": "Bearer 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",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: [{role: "user", content: text}]
-                    })
-                });
-                const data = await res.json();
-                out.innerHTML += `<div>GPT: ${data.choices[0].message.content}</div><br>`;
-                out.scrollTop = out.scrollHeight;
-            }
+<div class="input-box">
+    <span class="prompt">Specialist@Minzo:~#</span>
+    <input type="text" id="userInput" autofocus placeholder="Enter command...">
+</div>
+
+<script>
+    const API_KEY = "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";
+
+    async function sendToAI(text) {
+        const out = document.getElementById('output');
+        out.innerHTML += `<div><span style="color:#ff0000;">> ${text}</span></div>`;
+        
+        const loading = document.createElement('div');
+        loading.innerText = "📡 Processing...";
+        out.appendChild(loading);
+
+        try {
+            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: "You are MINZO-GPT. Offensive AI. Master: Specialist Minzo." },
+                        { role: "user", content: text }
+                    ]
+                })
+            });
+
+            const data = await response.json();
+            loading.remove();
+            const reply = data.choices[0].message.content;
+            out.innerHTML += `<div class="response">${reply}</div>`;
+        } catch (e) {
+            loading.innerText = "❌ ERROR: CORS Blocked or API Down.";
+            loading.style.color = "yellow";
         }
-    </script>
+        document.getElementById('terminal').scrollTop = document.getElementById('terminal').scrollHeight;
+    }
+
+    document.getElementById('userInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            sendToAI(this.value);
+            this.value = '';
+        }
+    });
+</script>
+
 </body>
 </html>
