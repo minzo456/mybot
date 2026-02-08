@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MINZO-GPT TERMINAL</title>
+    <style>
+        /* වීඩියෝ එකේ වගේ හැකර් පෙනුම */
+        body { background: #000; color: #00ff41; font-family: monospace; padding: 20px; }
+        #output { height: 400px; overflow: auto; border: 1px solid #00ff41; padding: 10px; margin-bottom: 10px; }
+        input { width: 90%; background: #000; border: 1px solid #ff0000; color: #fff; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🔱 MINZO-GPT V75.0</h1>
+    <div id="output">System Ready... Waiting for Specialist Command...</div>
+    <input type="text" id="cmd" placeholder="Type here..." onkeypress="run(event)">
+
+    <script>
+        async function run(e) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('cmd');
+                const out = document.getElementById('output');
+                const text = input.value;
+                
+                out.innerHTML += `<div style="color:red">Master: ${text}</div>`;
+                input.value = "";
+
+                // මෙන්න මෙතනදී තමයි AI එකට කනෙක්ට් වෙන්නේ (Encoded Key එක සමඟ)
+                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer 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",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [{role: "user", content: text}]
+                    })
+                });
+                const data = await res.json();
+                out.innerHTML += `<div>GPT: ${data.choices[0].message.content}</div><br>`;
+                out.scrollTop = out.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
